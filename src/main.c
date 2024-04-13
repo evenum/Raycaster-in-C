@@ -16,18 +16,20 @@ int main(int argc, char* args[]){
 
 	initSDL(&app, &player);
 
-	SDL_Event event;	while(1){
-	while(SDL_PollEvent(&event)){
-	switch (event.type) {
-		case SDL_QUIT:
-			SDL_Quit();			
-			exit(0);
-			break;
-		case SDL_KEYDOWN:
+	SDL_Event event;
+	while(1){
+
+		while(SDL_PollEvent(&event)){
+		switch (event.type) {
+			case SDL_QUIT:
+				SDL_Quit();			
+				exit(0);
+				break;
+			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym) {
 				case SDLK_UP:
 					movePlayerForward(&player);
-					if(detectCollision(&app, &player) == 1){
+					if(detectCollision(&app, &player) == true){
 						player.x = player.oldX;
 						player.y = player.oldY;
 						break;
@@ -35,7 +37,7 @@ int main(int argc, char* args[]){
 					break;
 				case SDLK_DOWN:
 					movePlayerBackward(&player);
-					if(detectCollision(&app, &player) == 1){
+					if(detectCollision(&app, &player) == true){
 						player.x = player.oldX;
 						player.y = player.oldY;
 						break;
@@ -43,13 +45,13 @@ int main(int argc, char* args[]){
 					break;
 				case SDLK_LEFT:
 					player.angle -= PLAYER_ANGLE;
-					if(player.angle == 360){
+					if(player.angle == -1 * (RM_2_PI)){
 						player.angle = 0;
 					}
 					break;
 				case SDLK_RIGHT:	
 					player.angle += PLAYER_ANGLE;
-					if(player.angle == -360){
+					if(player.angle == (RM_2_PI)){
 						player.angle = 0;
 					}
 					break;
@@ -60,12 +62,9 @@ int main(int argc, char* args[]){
 		default:
 			break;
 		}
-	}
-	
+	}	
 	updateMap(&app, &player);	
 	SDL_Delay(16);
 }
-
 cleanupSDL(&app);
-
 }

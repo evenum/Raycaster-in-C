@@ -12,35 +12,20 @@
 
 #define PLAYER_SPEED 4
 #define PLAYER_ANGLE (M_PI_4)
+#define RM_2_PI (6.28318530718)
+
+#define RAY_COUNT 10
+
+
 
 typedef struct {
-	
 	SDL_Window *window;
 	SDL_Renderer *renderer;
-
 }App;
 
-typedef struct{
-	
-	float x, y, angle;
-	float oldX, oldY;
-
-}Player;
-
-typedef struct{
-	float camX, camY;
-} cameraPlane;
-
-typedef struct{
-	
-	float length, angle;
-
-
-}ray;
-
-typedef struct{
-	float x, y;
-}nextSquare;
+typedef struct{	float x, y, angle, oldX, oldY; } Player;
+typedef struct{ float camX,   camY;  }			 cameraPlane;
+typedef struct{ float length, angle; }           ray;
 
 void initSDL(App *, Player *);
 void cleanupSDL(App *);
@@ -50,4 +35,5 @@ void updateMap(App *, Player *);
 bool detectCollision(App *, Player *);
 void movePlayerForward(Player *);
 void movePlayerBackward(Player *);
+
 #endif

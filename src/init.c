@@ -3,9 +3,11 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
+#include <stdlib.h>
 
 int map[MAP_BOUNDS][MAP_BOUNDS] = {
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -16,11 +18,11 @@ int map[MAP_BOUNDS][MAP_BOUNDS] = {
 	1,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,
 	1,0,1,1,1,1,0,1,0,0,0,0,1,0,0,1,
 	1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,
-	1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+	1,0,1,0,1,0,0,1,1,1,1,1,1,0,0,1,
+	1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,
+	1,0,1,0,1,0,0,0,0,1,0,0,0,0,0,1,
+	1,0,1,0,1,1,1,1,1,1,0,0,0,0,0,1,
+	1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
@@ -90,7 +92,6 @@ void drawPlayer(App *app, Player *player){
 	float endX = startX + 8 + (50 * cos(player->angle));
 	float endY = startY + 8 + (50 * sin(player->angle));
 
-
 	SDL_SetRenderDrawColor(app->renderer, 100, 0, 0, 255);
 	SDL_Rect rect = {player->x, player->y, WALL_SIZE/2, WALL_SIZE/2};	
 	SDL_RenderFillRect(app->renderer, &rect);
@@ -99,25 +100,29 @@ void drawPlayer(App *app, Player *player){
 						startX + 8,  startY + 8, 
 						endX, endY);
 	
-	float distance = 32;
-	float rayX = (mapCord(unmapCord(startX + distance)));
-	float rayY = startY + 8;
+	float distance = 0;
+//	double *rayAngle = malloc(sizeof(double));
+	double *rayX = malloc(sizeof(double));
+	double *rayY = malloc(sizeof(double));
 
-	for(;;){
-		if(map[unmapCord(rayY)][unmapCord(rayX)] != 1){
-			rayX += 32;
-		}
-		else{break;}
-	}
-	
-
+	*rayX = startX + 8 + (cos(player->angle));
+	*rayY = startY + 8 + (sin(player->angle));
 
 	SDL_SetRenderDrawColor(app->renderer, 0, 0, 255, 255);
-	SDL_RenderDrawLineF(app->renderer, 
-						startX + 8,  startY + 8, 
-						rayX, rayY);
-
-
+		for(;;){
+			if(map[unmapCord(*rayY)][unmapCord(*rayX)] != 1){
+				distance += 2;
+				*rayX = startX + 8 + (distance * (cos(player->angle)));
+				*rayY = startY + 8 + (distance * (sin(player->angle)));
+			} else {
+				break;
+			}
+		}
+		printf("Wall Detected at: %lf %lf\n", *rayX, *rayY);
+		// printf("rayAngle: %lf\n", *rayAngle);
+		SDL_RenderDrawLineF(app->renderer, 
+			startX + 8,  startY + 8, 
+			*rayX, *rayY);
 }
 
 void updateMap(App *app, Player *player){
@@ -131,8 +136,7 @@ void updateMap(App *app, Player *player){
 
 }
 
-bool detectCollision(App *app, Player *player){
-		
+bool detectCollision(App *app, Player *player){	
 	if(map[unmapCord(player->y)][unmapCord(player->x)] == 1 || 
 		map[unmapCord(player->y+8)][unmapCord(player->x+8)]){
 		return true;
@@ -151,8 +155,7 @@ void movePlayerBackward(Player *player){
 }
 
 
-void cleanupSDL(App *app){
-	
+void cleanupSDL(App *app){	
 	SDL_Delay(5000);
 	SDL_DestroyRenderer(app->renderer);
 	SDL_DestroyWindow(app->window);
